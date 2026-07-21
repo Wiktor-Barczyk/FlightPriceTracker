@@ -4,14 +4,14 @@ from datetime import datetime
 
 # Jeśli używasz GitHub Actions z Secrets, pobierze go automatycznie.
 # Jeśli testujesz na komputerze, wklej link bezpośrednio w cudzysłów poniżej.
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL") or "TUTAJ_WSTAW_SWOJ_LINK_WEBHOOK_Z_DISCORDA"
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 ORIGIN = "KRK"          # Kod IATA lotniska wylotu (np. KRK, WAW, GDN)
 DESTINATION = "CIA"     # Kod IATA lotniska powrotu (np. CIA, BGY, STN)
 OUT_DATE = "2026-08-01" # Format: YYYY-MM-DD
 IN_DATE = "2026-08-04"  # Format: YYYY-MM-DD
 ADULTS = 2              # Liczba dorosłych
-TARGET_PRICE = 1000     # Maksymalna cena łączna w PLN za WSZYSTKICH pasażerów
+TARGET_PRICE = 1050     # Maksymalna cena łączna w PLN za WSZYSTKICH pasażerów
 
 BOOKING_URL = (
     f"https://www.ryanair.com/pl/pl/trip/flights/select?"
