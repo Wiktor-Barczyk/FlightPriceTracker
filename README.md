@@ -1,69 +1,150 @@
-# FlightPriceChecker
+# FlightPriceTracker
 
-A simple Python script integrated with GitHub Actions and Discord that automatically tracks selected Ryanair flight prices and sends a Discord notification when the price drops below a set threshold.
+FlightPriceTracker to projekt służący do monitorowania cen lotów i śledzenia dostępnych ofert. Projekt łączy skrypt automatycznie sprawdzający ceny lotów Ryanair z aplikacją webową opartą na FastAPI.
 
-## Features
+## Funkcjonalności
 
-- automatic tracking of round-trip flight prices directly from the official Ryanair API,
-- Discord channel notifications (Discord Webhook) with a breakdown of price per person and total cost,
-- a direct button in the Discord message redirecting straight to ticket booking,
-- full cloud automation using GitHub Actions (runs every hour without keeping your PC on),
-- flexible configuration of flight parameters (route, dates, number of passengers, budget) in one place.
+- Monitorowanie cen lotów Ryanair.
+- Automatyczne sprawdzanie cen za pomocą GitHub Actions.
+- Wysyłanie powiadomień Discord po wykryciu odpowiedniej oferty.
+- REST API oparte na FastAPI.
+- Endpoint zwracający informacje o stanie aplikacji.
+- Endpoint zwracający listę przykładowych ofert lotów.
+- Automatyczne testowanie aplikacji za pomocą pytest.
 
-## Keys and Webhook Configuration
+## Technologie
 
-The application loads the Webhook URL from the `DISCORD_WEBHOOK_URL` environment variable stored in secure GitHub Secrets.
+- Python 3.12
+- FastAPI
+- Uvicorn
+- Requests
+- Pytest
+- HTTPX
+- GitHub Actions
+- Discord Webhooks
 
-### Step 1: Generating a Discord Webhook
-1. Open your Discord server.
-2. Go to **Edit Channel** (the gear icon next to the channel name) ➔ **Integrations** ➔ **Webhooks**.
-3. Click **New Webhook**, name it e.g., `FlightPriceChecker`, and click **Copy Webhook URL**.
-
-### Step 2: Configuring GitHub Secrets
-1. Go to your GitHub repository.
-2. Navigate to: **Settings** ➔ **Secrets and variables** (under the *Security* section) ➔ **Actions**.
-3. Click **New repository secret**.
-4. Set the parameters:
-   - **Name:** `DISCORD_WEBHOOK_URL`
-   - **Secret:** *(paste the copied URL from Discord)*
-5. Save by clicking **Add secret**.
-
-### Step 3: Configuring flight parameters in the code
-You can set all flight parameters directly at the top of the `main.py` file:
-
-```python
-ORIGIN = "KRK"          # IATA code of the departure airport (e.g., KRK)
-DESTINATION = "CIA"     # IATA code of the destination airport (e.g., CIA)
-OUT_DATE = "2026-08-01" # Departure date (Format: YYYY-MM-DD)
-IN_DATE = "2026-08-04"  # Return date (Format: YYYY-MM-DD)
-ADULTS = 2              # Number of adult passengers
-TARGET_PRICE = 1050     # Maximum total price in PLN for all passengers
-```
-
-## Execution (GitHub Actions)
-
-The script runs automatically every hour on GitHub servers.
-
-If you want to force an immediate price check on demand:
-1. Go to the **Actions** tab in your GitHub repository.
-2. Select the **Ryanair Price Check** workflow from the left list.
-3. Click the **Run workflow** button on the right side.
-
-## Project Structure
+## Struktura projektu
 
 ```text
-FlightPriceChecker/
-├─ main.py
-├─ README.md
-└─ .github/
-   └─ workflows/
-      └─ check_flights.yml
+FlightPriceTracker/
+├── .github/
+│   └── workflows/
+│       ├── check_flights.yml
+│       └── ci.yml
+├── app/
+│   ├── routes/
+│   │   ├── home.py
+│   │   └── flights.py
+│   ├── services/
+│   └── main.py
+├── tests/
+│   └── test_api.py
+├── main.py
+├── requirements.txt
+└── README.md
 ```
 
-## How it works
+## Wymagania
 
-1. GitHub Actions runs the `main.py` script automatically in the background every hour (using a Cron schedule).
-2. The script retrieves the `DISCORD_WEBHOOK_URL` address from secure GitHub secrets.
-3. The backend sends an HTTP GET request directly to the internal Ryanair API using the selected route and date parameters.
-4. The script extracts the lowest fares for the outbound and inbound flights and calculates the total cost for the specified number of passengers.
-5. If the total price is lower than or equal to the `TARGET_PRICE`, the script generates an Embed card and sends a notification to your Discord channel with a booking button.
+Do uruchomienia projektu potrzebne są:
+
+- Python 3.12
+- Git
+
+## Instalacja
+
+1. Sklonuj repozytorium:
+
+```bash
+git clone https://github.com/Wiktor-Barczyk/FlightPriceTracker.git
+```
+
+2. Przejdź do katalogu projektu:
+
+```bash
+cd FlightPriceTracker
+```
+
+3. Utwórz środowisko wirtualne:
+
+```bash
+python -m venv .venv
+```
+
+4. Aktywuj środowisko wirtualne.
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+5. Zainstaluj zależności:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+## Uruchamianie aplikacji FastAPI
+
+Uruchom serwer poleceniem:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Aplikacja będzie dostępna pod adresem:
+
+http://127.0.0.1:8000
+
+## Endpointy API
+
+| Metoda | Endpoint | Opis |
+|---|---|---|
+| GET | `/` | Informacje o stanie aplikacji |
+| GET | `/flights` | Lista przykładowych ofert lotów |
+
+### Dokumentacja API
+
+FastAPI udostępnia automatyczną dokumentację Swagger:
+
+http://127.0.0.1:8000/docs
+
+Dokumentacja alternatywna:
+
+http://127.0.0.1:8000/redoc
+
+## Testy jednostkowe
+
+Testy można uruchomić poleceniem:
+
+```bash
+python -m pytest -v
+```
+
+Testy sprawdzają poprawność odpowiedzi endpointów `/` oraz `/flights`.
+
+## GitHub Actions
+
+Projekt wykorzystuje dwa niezależne workflow:
+
+### CI – ci.yml
+
+- Automatyczne uruchamianie podczas Pull Requestów do gałęzi `main`.
+- Instalacja zależności.
+- Sprawdzanie składni kodu.
+- Uruchamianie testów jednostkowych.
+- Generowanie raportu testów.
+
+### Monitorowanie cen – check_flights.yml
+
+- Automatyczne uruchamianie skryptu monitorującego ceny Ryanair co godzinę.
+- Możliwość ręcznego uruchomienia workflow.
+- Wysyłanie powiadomień Discord.
+
+Do działania powiadomień wymagany jest sekret `DISCORD_WEBHOOK_URL` skonfigurowany w ustawieniach repozytorium GitHub.
+
+## Status projektu
+
+Projekt jest rozwijany etapami. Aplikacja FastAPI udostępnia obecnie podstawowe endpointy API, a lista lotów zawiera przykładowe dane demonstracyjne.
