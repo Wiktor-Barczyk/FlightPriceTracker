@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import home
+from app.routes import home, flights
 
 app = FastAPI(
     title="FlightPriceTracker API",
@@ -8,3 +8,4 @@ app = FastAPI(
 )
 
 app.include_router(home.router)
+app.include_router(flights.router)
